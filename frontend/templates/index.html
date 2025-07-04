@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilibili评论查看器</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <button id="theme-toggle-button" title="切换主题">☀️</button>
+        <h1>Bilibili评论查看器</h1>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="/repair" style="color: #00a1d6; text-decoration: none; font-size: 14px;">🔧 数据库修复工具</a>
+        </div>
+        
+        <!-- 图片预览模态框 -->
+        <div id="image-modal" class="modal">
+            <span class="modal-close" title="关闭">×</span>
+            <img class="modal-content" id="modal-image" src="" alt="图片预览">
+        </div>
+
+        <!-- 视频列表视图 -->
+        <div id="video-list-view">
+            <h2>视频列表</h2>
+            <div class="controls">
+                <input type="search" id="search-input" placeholder="搜索视频标题或BV号...">
+                <button id="search-button">搜索</button>
+            </div>
+            <div id="video-list" class="grid-container">
+                <!-- 视频卡片将通过JS动态加载 -->
+            </div>
+            <div id="video-pagination" class="pagination">
+                <!-- 分页控件将通过JS动态加载 -->
+            </div>
+            <div id="video-loading" class="loading" style="display: none;">加载视频中...</div>
+            <div id="video-error" class="error" style="display: none;"></div>
+        </div>
+
+        <!-- 评论视图 -->
+        <div id="comment-view" style="display: none;">
+            <button id="back-button">← 返回视频列表</button>
+            <h2 id="video-title"></h2>
+            <img id="video-cover" src="" alt="视频封面" class="video-cover">
+            <h3>评论 (<span id="comment-count">0</span>)</h3>
+            <div class="comment-controls controls"> 
+                <input type="search" id="comment-search-input" placeholder="搜索评论内容...">
+                <button id="comment-search-button">搜索评论</button>
+            </div>
+            <div id="comment-list">
+                <!-- 评论将通过JS动态加载 -->
+            </div>
+            <div id="comment-pagination" class="pagination">
+                <!-- 分页控件将通过JS动态加载 -->
+            </div>
+            <div id="comment-loading" class="loading" style="display: none;">加载评论中...</div>
+            <div id="comment-error" class="error" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

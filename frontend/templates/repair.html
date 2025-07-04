@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库修复工具 - Bilibili评论查看器</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/repair.css">
+</head>
+<body>
+    <button id="theme-toggle-button" title="切换主题" style="position: absolute; top: 20px; right: 20px; z-index: 1001;">☀️</button>
+    <div class="container repair-container">
+        <a href="/" style="color:#00a1d6;text-decoration:none;display:inline-block;margin-bottom:12px;">← 返回主页</a>
+        <div class="repair-header">
+            <h1>数据库修复工具</h1>
+            <p>用于快速校验和修复数据库中的常见数据问题。</p>
+        </div>
+        <div class="panel-row">
+            <div class="panel">
+                <div class="panel-title">全库操作</div>
+                <div class="panel-desc" style="font-size:13px;color:#aaa;margin-bottom:16px;white-space:pre-line;">
+本操作适用于批量导入数据后或怀疑存在大范围数据异常时，
+对所有视频和评论进行校验或修复。
+注意：
+操作过程可能耗时较长，请您耐心等待。
+                </div>
+                <div class="repair-btn-group">
+                    <button id="validate-all-btn" class="repair-button">全库校验</button>
+                    <button id="repair-all-btn" class="repair-button repair">全库修复</button>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">单视频操作</div>
+                <div class="panel-desc" style="font-size:13px;color:#aaa;margin-bottom:16px;white-space:pre-line;">
+仅针对单个视频进行校验或修复。
+仅修补数据库中已存在的视频数据，不能新增视频。
+                </div>
+                <input type="text" id="bvid-input" class="repair-input" placeholder="请输入 BV 号，如 BV1xx411c7mD">
+                <div class="repair-btn-group">
+                    <button id="validate-video-btn" class="repair-button" disabled>校验此视频</button>
+                    <button id="repair-video-btn" class="repair-button repair" disabled>修复此视频</button>
+                </div>
+            </div>
+        </div>
+        <div id="loading" class="loading" style="display: none;"></div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="success" class="success" style="display: none;"></div>
+        <div id="results" style="display: none;">
+            <div id="summary" class="summary-card"></div>
+            <h3 style="font-size:15px;margin:10px 0 8px 0;">发现的问题</h3>
+            <div id="issues-list"></div>
+        </div>
+    </div>
+    <script type="module" src="/static/js/repair/index.js"></script>
+</body>
+</html> 

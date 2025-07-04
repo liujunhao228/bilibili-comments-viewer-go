@@ -1,0 +1,33 @@
+app_name: "BilibiliCommentsViewer"
+default_port: 5000
+user_data_dir: "~/bilibili-comments-viewer"
+database_path: "{{user_data_dir}}/bilibili.db"
+sample_data_dir: "./sample_data"
+image_storage_dir: "{{user_data_dir}}/images"
+frontend_dir: "./frontend"
+crawler_output_dir: "{{user_data_dir}}/crawler_output"
+crawler:
+  cookie_file: "./cookie.txt"
+  output_dir: "./crawler_output"
+  workers: 2
+  max_try_count: 5
+  img_download: true
+  no_cover: false
+  save_mode: "db_only"  # 可选值: csv_only, db_only, csv_and_db
+  delay_base_ms: 2000
+  delay_jitter_ms: 1000
+
+# 新增日志配置
+logging:
+  log_file: "{{user_data_dir}}/logs/app.log"
+  log_level: "info"       # 可选: debug, info, warn, error, fatal
+  max_size_mb: 10         # 日志文件最大大小(MB)
+  max_backups: 5          # 保留的旧日志文件数量
+  max_age_days: 30        # 日志保留天数
+
+# 允许代理的图片域名
+allowed_image_domains:
+  - i0.hdslb.com
+  - i1.hdslb.com
+  - i2.hdslb.com
+  - s1.hdslb.com

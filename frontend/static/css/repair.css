@@ -1,0 +1,162 @@
+/* repair.css: 从 repair.html 分离出的样式，并以repair.html为准 */
+.repair-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 12px;
+}
+.repair-header {
+    text-align: center;
+    margin-bottom: 18px;
+}
+.repair-header h1 {
+    margin-bottom: 8px;
+}
+.repair-header p {
+    color: var(--card-info-text-p);
+    font-size: 15px;
+}
+.panel {
+    background: var(--card-bg);
+    border: 1px solid var(--card-shadow);
+    border-radius: 8px;
+    padding: 20px 18px 16px 18px;
+    margin-bottom: 18px;
+}
+.panel-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-heading);
+    margin-bottom: 2px;
+}
+.panel-desc {
+    font-size: 13px;
+    color: var(--card-info-text-p);
+    margin-bottom: 16px;
+}
+.repair-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    font-size: 14px;
+    margin-bottom: 8px;
+    background: var(--input-bg);
+    color: var(--input-text);
+}
+.repair-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.repair-button {
+    padding: 10px 0;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s;
+}
+.repair-button.repair {
+    background: #28a745;
+}
+.repair-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+.loading, .error, .success {
+    margin: 18px 0 0 0;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 15px;
+}
+.loading { background: var(--loading-bg); color: var(--loading-text); text-align: center; }
+.error { background: var(--error-bg); color: var(--error-text); border: 1px solid #f5c6cb; }
+.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.summary-card {
+    background: var(--loading-bg);
+    border: 1px solid #2196f3;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+.summary-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--loading-text);
+}
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+.stat-item { text-align: center; }
+.stat-value { font-size: 20px; font-weight: bold; color: var(--loading-text); }
+.stat-label { font-size: 12px; color: var(--card-info-text-p); text-transform: uppercase; }
+.issue-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-shadow);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+.issue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.issue-type { font-weight: bold; font-size: 15px; }
+.issue-severity { padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+.severity-critical { background: #dc3545; color: white; }
+.severity-high { background: #fd7e14; color: white; }
+.severity-medium { background: #ffc107; color: black; }
+.severity-low { background: #28a745; color: white; }
+.issue-description { color: var(--card-info-text-p); margin-bottom: 6px; font-size: 13px; }
+.issue-details { display: flex; gap: 12px; font-size: 13px; color: var(--text-primary); }
+.issue-details-text { background: var(--bg-container); border: 1px solid var(--card-shadow); border-radius: 4px; padding: 8px; margin: 8px 0; font-size: 13px; color: var(--text-primary); }
+.issue-bvids { background: var(--loading-bg); border: 1px solid #bbdefb; border-radius: 4px; padding: 6px 10px; margin: 8px 0; font-size: 13px; color: var(--loading-text); font-family: 'Courier New', monospace; }
+.issue-category { background: #f3e5f5; border: 1px solid #e1bee7; border-radius: 4px; padding: 4px 8px; margin: 6px 0; font-size: 12px; color: #7b1fa2; display: inline-block; }
+/* 保留repair.css中独有的.panel-row等布局样式 */
+.panel-row {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.panel-row .panel {
+    display: flex;
+    flex-direction: column;
+}
+.panel-row .repair-btn-group {
+    margin-top: auto;
+}
+@media (min-width: 800px) {
+    .container.repair-container {
+        max-width: 1200px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 32px;
+        padding-right: 32px;
+        box-sizing: border-box;
+    }
+    .panel-row {
+        flex-direction: row;
+        gap: 24px;
+    }
+    .panel-row .panel {
+        flex: 1 1 0;
+        margin-bottom: 0;
+    }
+}
+@media (max-width: 800px) {
+    .panel-row {
+        flex-direction: column;
+    }
+}
+@media (max-width: 600px) {
+    .repair-container { padding: 8px; }
+    .panel { padding: 12px 6px; }
+} 
