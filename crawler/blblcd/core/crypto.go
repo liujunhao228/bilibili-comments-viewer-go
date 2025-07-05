@@ -15,6 +15,7 @@ import (
 
 	"bilibili-comments-viewer-go/crawler/bili_info/config"
 	"bilibili-comments-viewer-go/crawler/bili_info/util"
+	"bilibili-comments-viewer-go/logger"
 
 	"github.com/tidwall/gjson"
 )
@@ -192,6 +193,12 @@ func swapString(s string, x, y int) string {
 
 // Bvid2Avid 将 BVID 转换为 AVID
 func Bvid2Avid(bvid string) (avid int64) {
+	// 边界条件处理
+	if len(bvid) < 4 {
+		logger.GetLogger().Errorf("Invalid BVID: %s", bvid)
+		return 0
+	}
+
 	s := swapString(swapString(bvid, 3, 9), 4, 7)
 	bv1 := string([]rune(s)[3:])
 	temp := int64(0)

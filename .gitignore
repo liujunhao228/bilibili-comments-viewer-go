@@ -19,3 +19,9 @@
 
 # Go workspace file
 go.work
+
+# cookie
+*cookie*.txt
+
+# output
+/crawler_output

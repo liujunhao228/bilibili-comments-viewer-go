@@ -6,6 +6,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
+	"runtime"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -58,18 +61,23 @@ func FetchCount(oid string) (count int, err error) {
 // offsetStr: 分页 offset
 // 返回值: 评论响应结构体和错误
 func FetchComment(oid string, next int, order int, cookie string, offsetStr string) (data model.CommentResponse, err error) {
+	funcName := runtime.FuncForPC(reflect.ValueOf(FetchComment).Pointer()).Name()
+	logger.GetLogger().Debugf("START %s: oid=%s, page=%d", funcName, oid, next)
+
 	defer func() {
 		if r := recover(); r != nil {
-			logger.GetLogger().Errorf("====爬取主评论,oid:%s，第%d页失败=====", oid, next)
-			logger.GetLogger().Error(r)
-			err = fmt.Errorf("爬取评论时发生panic: %v", r)
+			logger.GetLogger().Errorf("API请求 PANIC: %v\n%s", r, string(debug.Stack()))
+			err = fmt.Errorf("API请求时发生panic: %v", r)
 		}
+		logger.GetLogger().Debugf("END %s: oid=%s, page=%d", funcName, oid, next)
 	}()
 
 	// +++ 添加详细日志 +++
 	logger.GetLogger().Debugf("请求评论API: oid=%s, page=%d, offset=%s", oid, next, offsetStr)
 	client := resty.New()
-	client.SetTimeout(15 * time.Second) // 增加超时时间
+	client.SetTimeout(30 * time.Second) // 增加超时时间
+	client.SetRetryCount(3)
+	client.SetRetryWaitTime(2 * time.Second)
 
 	var fmtOffsetStr string
 	if offsetStr == "" {
@@ -162,16 +170,16 @@ func FetchComment(oid string, next int, order int, cookie string, offsetStr stri
 // 返回值: 评论响应结构体和错误
 func FetchSubComment(oid string, rpid int64, next int, cookie string) (data model.CommentResponse, err error) {
 	defer func() {
-		if err := recover(); err != nil {
-			logger.GetLogger().Errorf("xxxxx爬取子评论,oid:%s，第%d页失败xxxxx", oid, next)
-			logger.GetLogger().Error(err)
+		if r := recover(); r != nil {
+			logger.GetLogger().Errorf("子评论API请求 PANIC: %v\n%s", r, string(debug.Stack()))
+			err = fmt.Errorf("子评论API请求时发生panic: %v", r)
 		}
 	}()
 
 	logger.GetLogger().Debugf("请求子评论API: oid=%s, rpid=%d, page=%d", oid, rpid, next)
 
 	client := http.Client{
-		Timeout: 15 * time.Second, // 增加超时时间
+		Timeout: 30 * time.Second, // 增加超时时间
 	}
 	payload := strings.NewReader("")
 

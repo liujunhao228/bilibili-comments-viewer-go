@@ -3,6 +3,9 @@ package backend
 import (
 	"context"
 	"path/filepath"
+	"reflect"
+	"runtime"
+	"runtime/debug"
 
 	"bilibili-comments-viewer-go/config"
 	"bilibili-comments-viewer-go/crawler/blblcd"
@@ -12,8 +15,19 @@ import (
 )
 
 func crawlVideoComments(ctx context.Context, bvid string) ([]blblcdmodel.Comment, error) {
-	cfg := config.Get()
+	funcName := runtime.FuncForPC(reflect.ValueOf(crawlVideoComments).Pointer()).Name()
 	log := logger.GetLogger()
+
+	log.Infof("START %s: bvid=%s", funcName, bvid)
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("crawlVideoComments PANIC: %v\n%s", r, string(debug.Stack()))
+		}
+		log.Infof("END %s: bvid=%s", funcName, bvid)
+	}()
+
+	cfg := config.Get()
 
 	// +++ 添加详细日志 +++
 	log.Infof("开始爬取视频评论: bvid=%s", bvid)

@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
+	"runtime"
+	"runtime/debug"
+	"time"
 
 	"bilibili-comments-viewer-go/config"
 	"bilibili-comments-viewer-go/crawler/blblcd"
@@ -15,10 +19,24 @@ import (
 )
 
 func CrawlAndImport(ctx context.Context, bvid string) error {
-	cfg := config.Get()
+	funcName := runtime.FuncForPC(reflect.ValueOf(CrawlAndImport).Pointer()).Name()
 	log := logger.GetLogger()
 
+	// 添加上下文超时控制
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Minute)
+	defer cancel()
+
 	// +++ 添加关键日志 +++
+	log.Infof("START %s: bvid=%s", funcName, bvid)
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("CrawlAndImport PANIC: %v\n%s", r, string(debug.Stack()))
+		}
+		log.Infof("END %s: bvid=%s", funcName, bvid)
+	}()
+
+	cfg := config.Get()
 	log.Infof("开始处理视频: %s (保存模式: %s)", bvid, cfg.Crawler.SaveMode)
 
 	// 获取并保存视频元数据

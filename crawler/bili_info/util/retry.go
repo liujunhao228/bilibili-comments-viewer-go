@@ -1,6 +1,7 @@
 package util
 
 import (
+	"math"
 	"math/rand"
 	"time"
 
@@ -9,11 +10,13 @@ import (
 
 // RetryDelay 指数退避延时（支持自定义参数）
 func RetryDelay(attempt int, baseDelay, maxDelay time.Duration) time.Duration {
-	delay := time.Duration(1<<uint(attempt)) * baseDelay
-	if delay > maxDelay {
-		delay = maxDelay
+	retryDelay := time.Duration(math.Pow(2, float64(attempt))) * time.Second
+	if retryDelay > maxDelay {
+		retryDelay = maxDelay
 	}
-	return delay
+	// 添加随机抖动
+	jitter := time.Duration(rand.Intn(1000)) * time.Millisecond
+	return retryDelay + jitter
 }
 
 // 兼容老接口

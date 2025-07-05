@@ -6,6 +6,9 @@ import (
 	"math/rand"
 	"os"
 	"path"
+	"reflect"
+	"runtime"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
@@ -26,15 +29,18 @@ import (
 // opt: 爬取选项
 // resultChan: 评论结果输出通道
 func FindComment(ctx context.Context, sem chan struct{}, wg *sync.WaitGroup, avid int, opt *model.Option, resultChan chan<- model.Comment) {
+	funcName := runtime.FuncForPC(reflect.ValueOf(FindComment).Pointer()).Name()
+	logger.GetLogger().Infof("START %s: avid=%d", funcName, avid)
+
 	defer func() {
-		if err := recover(); err != nil {
-			logger.GetLogger().Errorf("爬取视频：%d失败", avid)
-			logger.GetLogger().Error(err)
+		if r := recover(); r != nil {
+			logger.GetLogger().Errorf("PANIC in %s: %v\n%s", funcName, r, string(debug.Stack()))
 		}
-		<-sem
 		if wg != nil {
 			wg.Done()
 		}
+		<-sem
+		logger.GetLogger().Infof("END %s: avid=%d", funcName, avid)
 	}()
 
 	oid := strconv.Itoa(avid)
@@ -93,6 +99,14 @@ mainLoop:
 			break
 		}
 
+		// 内存监控
+		if page%10 == 0 {
+			var m runtime.MemStats
+			runtime.ReadMemStats(&m)
+			logger.GetLogger().Debugf("Memory: Alloc=%.2fMB, TotalAlloc=%.2fMB",
+				float64(m.Alloc)/1024/1024, float64(m.TotalAlloc)/1024/1024)
+		}
+
 		if consecutiveEmptyPages >= opt.MaxTryCount {
 			logger.GetLogger().Infof("连续 %d 页无新评论，停止爬取", opt.MaxTryCount)
 			break
@@ -105,17 +119,18 @@ mainLoop:
 		go func(pageNum int, offset string) {
 			defer func() {
 				if r := recover(); r != nil {
-					logger.GetLogger().Errorf("爬取第%d页评论时发生panic: %v", pageNum, r)
+					logger.GetLogger().Errorf("Page %d goroutine PANIC: %v\n%s", pageNum, r, string(debug.Stack()))
 				}
-				<-sem
 				pageWg.Done()
+				<-sem
 			}()
 
 			select {
 			case <-ctx.Done():
-				logger.GetLogger().Infof("[goroutine] 收到取消信号，退出第%d页", pageNum)
+				logger.GetLogger().Debugf("Page %d canceled", pageNum)
 				return
 			default:
+				// 正常执行
 			}
 
 			// 延迟与抖动，防止被风控
@@ -125,6 +140,13 @@ mainLoop:
 			time.Sleep(delay)
 
 			logger.GetLogger().Infof("并发爬取第 %d 页评论 (oid: %s, offset: %s)", pageNum, oid, offset)
+
+			// 计算进度百分比
+			if total > 0 {
+				progressPercent := float64(downloadedCount) / float64(total) * 100
+				logger.GetLogger().Infof("Processing page %d, progress: %.1f%% (%d/%d)",
+					pageNum, progressPercent, downloadedCount, total)
+			}
 			cmtInfo, err := FetchComment(oid, pageNum, opt.Corder, opt.Cookie, offset)
 			if err != nil {
 				logger.GetLogger().Errorf("请求评论失败，视频%s，第%d页: %v", oid, pageNum, err)
@@ -241,6 +263,12 @@ mainLoop:
 // opt: 爬取选项
 // 返回值: 子评论集合
 func FindSubComment(cmt model.ReplyItem, opt *model.Option) []model.ReplyItem {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.GetLogger().Errorf("FindSubComment PANIC: %v\n%s", r, string(debug.Stack()))
+		}
+	}()
+
 	oid := strconv.Itoa(cmt.Oid)
 	round := 1
 	replyCollection := []model.ReplyItem{}
@@ -311,6 +339,12 @@ func FindSubComment(cmt model.ReplyItem, opt *model.Option) []model.ReplyItem {
 
 // NewCMT 将 ReplyItem 转换为 Comment 结构体
 func NewCMT(item *model.ReplyItem) model.Comment {
+	// 边界条件处理
+	if item == nil {
+		logger.GetLogger().Warn("Invalid ReplyItem received: nil pointer")
+		return model.Comment{}
+	}
+
 	// Oid 校验
 	var bvid string
 	if item.Oid > 0 {
@@ -343,9 +377,8 @@ func NewCMT(item *model.ReplyItem) model.Comment {
 // opt: 爬取选项（需包含 mid）
 func FindUser(sem chan struct{}, opt *model.Option) {
 	defer func() {
-		if err := recover(); err != nil {
-			logger.GetLogger().Errorf("爬取up：%d失败", opt.Mid)
-			logger.GetLogger().Error(err)
+		if r := recover(); r != nil {
+			logger.GetLogger().Errorf("FindUser PANIC: %v\n%s", r, string(debug.Stack()))
 		}
 	}()
 

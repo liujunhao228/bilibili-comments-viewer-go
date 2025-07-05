@@ -3,6 +3,9 @@ package blblcd
 
 import (
 	"context"
+	"reflect"
+	"runtime"
+	"runtime/debug"
 	"sync"
 
 	"bilibili-comments-viewer-go/crawler/blblcd/core"
@@ -16,6 +19,16 @@ import (
 // opt: 爬取选项，包括并发数等
 // 返回值: 评论列表和错误信息
 func CrawlVideo(ctx context.Context, bvid string, opt *model.Option) ([]model.Comment, error) {
+	funcName := runtime.FuncForPC(reflect.ValueOf(CrawlVideo).Pointer()).Name()
+	logger.GetLogger().Infof("START %s: bvid=%s", funcName, bvid)
+
+	defer func() {
+		if r := recover(); r != nil {
+			logger.GetLogger().Errorf("CrawlVideo PANIC: %v\n%s", r, string(debug.Stack()))
+		}
+		logger.GetLogger().Infof("END %s: bvid=%s", funcName, bvid)
+	}()
+
 	// 记录开始爬取日志
 	logger.GetLogger().Infof("开始爬取视频: bvid=%s", bvid)
 
@@ -33,7 +46,7 @@ func CrawlVideo(ctx context.Context, bvid string, opt *model.Option) ([]model.Co
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				logger.GetLogger().Errorf("[panic] CrawlVideo goroutine: %v", r)
+				logger.GetLogger().Errorf("CrawlVideo goroutine PANIC: %v\n%s", r, string(debug.Stack()))
 			}
 			findWg.Done()
 		}()
@@ -48,6 +61,11 @@ func CrawlVideo(ctx context.Context, bvid string, opt *model.Option) ([]model.Co
 
 	// 关闭通道并收集所有评论
 	close(resultChan)
+	defer func() {
+		for range resultChan {
+		} // 清空通道
+	}()
+
 	for comment := range resultChan {
 		comments = append(comments, comment)
 	}
